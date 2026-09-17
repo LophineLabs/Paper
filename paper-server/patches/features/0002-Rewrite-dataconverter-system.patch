@@ -33136,10 +33136,10 @@ index 0000000000000000000000000000000000000000..863a9785c84af6e0c961ae32f0102b5d
 +    }
 +}
 diff --git a/ca/spottedleaf/moonrise/paper/PaperHooks.java b/ca/spottedleaf/moonrise/paper/PaperHooks.java
-index d69358d60146e47b7f4669c43afc6c97cbde276f..c34b3c1c0e4fe6503a5702e544a192d2bb11d263 100644
+index 0a2694f731b1118d99e728e5065f0157700ba035..92238518c25dd765b356ff628fd373997464ea82 100644
 --- a/ca/spottedleaf/moonrise/paper/PaperHooks.java
 +++ b/ca/spottedleaf/moonrise/paper/PaperHooks.java
-@@ -230,6 +230,11 @@ public final class PaperHooks extends BaseChunkSystemHooks implements PlatformHo
+@@ -225,6 +225,11 @@ public final class PaperHooks extends BaseChunkSystemHooks implements PlatformHo
      @Override
      public CompoundTag convertNBT(final DSL.TypeReference type, final DataFixer dataFixer, final CompoundTag nbt,
                                    final int fromVersion, final int toVersion) {
@@ -33151,7 +33151,7 @@ index d69358d60146e47b7f4669c43afc6c97cbde276f..c34b3c1c0e4fe6503a5702e544a192d2
          return (CompoundTag)dataFixer.update(
              type, new Dynamic<>(NbtOps.INSTANCE, nbt), fromVersion, toVersion
          ).getValue();
-@@ -271,4 +276,4 @@ public final class PaperHooks extends BaseChunkSystemHooks implements PlatformHo
+@@ -266,4 +271,4 @@ public final class PaperHooks extends BaseChunkSystemHooks implements PlatformHo
      public boolean addTicketForEnderPearls(final ServerLevel world) {
          return !world.paperConfig().misc.legacyEnderPearlBehavior;
      }
@@ -33159,11 +33159,11 @@ index d69358d60146e47b7f4669c43afc6c97cbde276f..c34b3c1c0e4fe6503a5702e544a192d2
 \ No newline at end of file
 +}
 diff --git a/net/minecraft/data/structures/StructureUpdater.java b/net/minecraft/data/structures/StructureUpdater.java
-index 945fdc4b3958a88342cc881edd6270c2123a8249..212172b6451a073e7c64a336fe4c0650a2c4d5f4 100644
+index 06103ffdf599af91bc1d3baf89772a1acc93a21a..ddaa6ba67a2af00565fe9cd0dbeafcac0ff041ec 100644
 --- a/net/minecraft/data/structures/StructureUpdater.java
 +++ b/net/minecraft/data/structures/StructureUpdater.java
 @@ -27,7 +27,7 @@ public class StructureUpdater implements SnbtToNbt.Filter {
-             LOGGER.warn("SNBT Too old, do not forget to update: {} < {}: {}", fromVersion, 4882, name);
+             LOGGER.warn("SNBT Too old, do not forget to update: {} < {}: {}", fromVersion, 4997, name);
          }
  
 -        CompoundTag updated = DataFixTypes.STRUCTURE.updateToCurrentVersion(DataFixers.getDataFixer(), tag, fromVersion);
@@ -33172,10 +33172,10 @@ index 945fdc4b3958a88342cc881edd6270c2123a8249..212172b6451a073e7c64a336fe4c0650
          return structureTemplate.save(new CompoundTag());
      }
 diff --git a/net/minecraft/server/MinecraftServer.java b/net/minecraft/server/MinecraftServer.java
-index 90fcdd0b859ea2cbc24938a8fa09c964d5de7114..bbc8899e2524f39a89525d6f54dc8bd0bded88d9 100644
+index 43ceb70d1e0c577f5e48fad0ea1e1d4ad36d84c6..255e01251005a547088aba437ca27ce06fc996e5 100644
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
-@@ -298,6 +298,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -293,6 +293,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
      private final ServerClockManager clockManager;
  
      public static <S extends MinecraftServer> S spin(final Function<Thread, S> factory) {
@@ -33218,10 +33218,10 @@ index 4346f3bace176e09d9ffb02e9af29a1281071e2a..df4f03f3a346e0ab0074757b3a077b24
          return this.upgradeChunkTag(chunkTag, defaultVersion, null, SharedConstants.getCurrentVersion().dataVersion().version());
      }
 diff --git a/net/minecraft/world/level/levelgen/structure/StructureCheck.java b/net/minecraft/world/level/levelgen/structure/StructureCheck.java
-index 54163ba2aa6697055260470e0771ed10f71f23e2..2fd8192dd9a041afe97f7776c06551fb087a3f2a 100644
+index fa361cff8515b7b5140797ce2bb1a39e9255725c..d3b1fe4eb48c844ab19096dbcf0ceb1f58c35eb6 100644
 --- a/net/minecraft/world/level/levelgen/structure/StructureCheck.java
 +++ b/net/minecraft/world/level/levelgen/structure/StructureCheck.java
-@@ -166,7 +166,7 @@ public class StructureCheck {
+@@ -181,7 +181,7 @@ public class StructureCheck {
  
              CompoundTag fixedChunkTag;
              try {
