@@ -2194,11 +2194,7 @@ index 0000000000000000000000000000000000000000..259b301b2c8b64cb7974a235afb260e0
 +}
 diff --git a/alternate/current/wire/WireNode.java b/alternate/current/wire/WireNode.java
 new file mode 100644
-<<<<<<<< HEAD:paper-server/patches/features/0013-Add-Alternate-Current-redstone-implementation.patch
-index 0000000000000000000000000000000000000000..94e68be9548dc3c25504595587c0abdcc640ce08
-========
 index 0000000000000000000000000000000000000000..505b5e39d0b4cf2a56c1c720f0c9ab017522dc4f
->>>>>>>> upstream/dev/26.3:paper-server/patches/features/0012-Add-Alternate-Current-redstone-implementation.patch
 --- /dev/null
 +++ b/alternate/current/wire/WireNode.java
 @@ -0,0 +1,122 @@
@@ -2217,7 +2213,7 @@ index 0000000000000000000000000000000000000000..505b5e39d0b4cf2a56c1c720f0c9ab01
 + * A WireNode is a Node that represents a wire in the world. It stores all the
 + * information about the wire that the WireHandler needs to calculate power
 + * changes.
-+ *
++ * 
 + * @author Space Walker
 + */
 +public class WireNode extends Node {
@@ -2325,11 +2321,7 @@ index 0000000000000000000000000000000000000000..505b5e39d0b4cf2a56c1c720f0c9ab01
 +    }
 +}
 diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-<<<<<<<< HEAD:paper-server/patches/features/0013-Add-Alternate-Current-redstone-implementation.patch
-index 284fa2c1ccedb656e1c3f7a81079e2ca09dd4299..5f9bcbcbbf6b68713b811ec9052a5a58900ed360 100644
-========
 index 7fa69d76bf2c802b538a21af40898b8abb79629e..d9daa3ea8c4dc21bbe0d0ea9f0ece3f6c6777ba4 100644
->>>>>>>> upstream/dev/26.3:paper-server/patches/features/0012-Add-Alternate-Current-redstone-implementation.patch
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
 @@ -238,6 +238,7 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
@@ -2355,7 +2347,7 @@ index 7fa69d76bf2c802b538a21af40898b8abb79629e..d9daa3ea8c4dc21bbe0d0ea9f0ece3f6
          return toLevel.dimension() != Level.NETHER || this.getGameRules().get(GameRules.ALLOW_ENTERING_NETHER_USING_PORTALS);
      }
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index b49b629909ddfd887c82be8434e559d7dfac5e23..97613909ae6d30d102e90533bcdf711f168ecc58 100644
+index efcf399ced67201525ea6e6b3bd46b93b7e1823d..a1da101177a5a4fb2b4ba5e34be165daf4d147fb 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
 @@ -2169,6 +2169,17 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl

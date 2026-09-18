@@ -6,7 +6,7 @@ Subject: [PATCH] Optimise collision checking in player move packet handling
 Move collision logic to just the hasNewCollision call instead of getCubes + hasNewCollision
 
 diff --git a/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/net/minecraft/server/network/ServerGamePacketListenerImpl.java
-index 4cfd50460707ad40498b0e2f5b891811fd99a6ff..995f77703c91485f83c3b18ae8c34ad2161cacfc 100644
+index f01fede96872749f1ac664d0c53c2ef3617bed0e..ba15cb7d02e8aad621c8b9a224694910f36d81df 100644
 --- a/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 +++ b/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 @@ -647,6 +647,7 @@ public class ServerGamePacketListenerImpl

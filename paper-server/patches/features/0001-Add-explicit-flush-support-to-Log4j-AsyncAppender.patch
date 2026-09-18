@@ -59,7 +59,7 @@ index f84870712345cd688a90ea53ad47eb33fe658863..126a5d1bc4239ba83565600a060877c2
       * Returns the name of the appender that any errors are logged to or {@code null}.
       *
 diff --git a/org/apache/logging/log4j/core/appender/AsyncAppenderEventDispatcher.java b/org/apache/logging/log4j/core/appender/AsyncAppenderEventDispatcher.java
-index ed962f5952c0861809d2558e709e8dd683751383..6f6b1e219b7ee99851e766ffc26af7db5dbeef1f 100644
+index ed962f5952c0861809d2558e709e8dd683751383..a12872c42a26d469e5b7004f7fe7ae535071a633 100644
 --- a/org/apache/logging/log4j/core/appender/AsyncAppenderEventDispatcher.java
 +++ b/org/apache/logging/log4j/core/appender/AsyncAppenderEventDispatcher.java
 @@ -33,6 +33,25 @@ class AsyncAppenderEventDispatcher extends Log4jThread {
@@ -154,7 +154,7 @@ index ed962f5952c0861809d2558e709e8dd683751383..6f6b1e219b7ee99851e766ffc26af7db
 +        }
 +
 +        // If the dispatcher thread has not started yet, fail fast
-+        if (State.NEW.equals(getState())) {
++        if (Thread.State.NEW.equals(getState())) {
 +            return false;
 +        }
 +
