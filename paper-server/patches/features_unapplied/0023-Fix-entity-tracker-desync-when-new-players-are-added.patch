@@ -48,10 +48,10 @@ index cff05f64af7f425b77cbbd7680c5cc592faa798c..0ab4080c8e30d5ee14ce5fcbac64b031
              serverEntity.getLastSentYRot(),
              entity.getType(),
 diff --git a/net/minecraft/server/level/ChunkMap.java b/net/minecraft/server/level/ChunkMap.java
-index 206a897e9d74b48d38e2ea1652e9b7ed4735f828..5a8f8eb8f6400ab2397483400ef3853fd0cf6895 100644
+index 3a6410f4b061c7431ad09b23be9691160c36ef6c..29e02b01ba7eeb7767e8dad6b3be909f08825c16 100644
 --- a/net/minecraft/server/level/ChunkMap.java
 +++ b/net/minecraft/server/level/ChunkMap.java
-@@ -1378,6 +1378,7 @@ public class ChunkMap extends SimpleRegionStorage implements ChunkHolder.PlayerP
+@@ -1383,6 +1383,7 @@ public class ChunkMap extends SimpleRegionStorage implements ChunkHolder.PlayerP
                          ChunkMap.this.level.debugSynchronizers().startTrackingEntity(player, this.entity);
                          }
                          // Paper end - entity tracking events
@@ -60,10 +60,10 @@ index 206a897e9d74b48d38e2ea1652e9b7ed4735f828..5a8f8eb8f6400ab2397483400ef3853f
                  } else {
                      this.removePlayer(player);
 diff --git a/net/minecraft/server/level/ServerEntity.java b/net/minecraft/server/level/ServerEntity.java
-index 267259a79c7668da85d206f9dcbde16b379e2738..84a0c43bdaf7c6fe0067a421ba39964b36e679a5 100644
+index 26822e1211194b411dd8ea75ce523133e5389e47..60af82925d2f7e605bf7340cf01f1a5668f4d725 100644
 --- a/net/minecraft/server/level/ServerEntity.java
 +++ b/net/minecraft/server/level/ServerEntity.java
-@@ -102,6 +102,13 @@ public class ServerEntity {
+@@ -89,6 +89,13 @@ public class ServerEntity {
          this.trackedDataValues = entity.getEntityData().getNonDefaultValues();
      }
  
@@ -77,65 +77,25 @@ index 267259a79c7668da85d206f9dcbde16b379e2738..84a0c43bdaf7c6fe0067a421ba39964b
      public void sendChanges() {
          // Paper start - optimise collisions
          if (((ca.spottedleaf.moonrise.patches.chunk_system.entity.ChunkSystemEntity)this.entity).moonrise$isHardColliding()) {
-@@ -147,7 +154,7 @@ public class ServerEntity {
+@@ -135,7 +142,7 @@ public class ServerEntity {
              this.entity.syncPosition = false;
          }
  
--        if (this.entity.needsSync || this.updateInterval.test(this.tickCount) || this.entity.getEntityData().isDirty()) {
-+        if (this.forceStateResync || this.entity.needsSync || this.updateInterval.test(this.tickCount) || this.entity.getEntityData().isDirty()) { // Paper - fix desync when a player is added to the tracker
+-        if (this.tickCount % this.updateInterval == 0 || this.entity.needsSync || this.entity.getEntityData().isDirty()) {
++        if (this.forceStateResync || this.tickCount % this.updateInterval == 0 || this.entity.needsSync || this.entity.getEntityData().isDirty()) { // Paper - fix desync when a player is added to the tracker
              byte yRotn = Mth.packDegrees(this.entity.getYRot());
              byte xRotn = Mth.packDegrees(this.entity.getXRot());
              boolean shouldSendRotation = Math.abs(yRotn - this.lastSentYRot) >= 1 || Math.abs(xRotn - this.lastSentXRot) >= 1;
-@@ -167,18 +174,38 @@ public class ServerEntity {
-             } else {
-                 this.teleportDelay++;
-                 PositionPath position = this.interpolationTracker.getPositionPath(currentPosition);
--                this.interpolationTracker.clear();
-+
-+                // Paper start - reduce allocation of Vec3 here
-+                Vec3 base = this.positionCodec.base;
-+                double dx = currentPosition.x - base.x;
-+                double dy = currentPosition.y - base.y;
-+                double dz = currentPosition.z - base.z;
-+                boolean positionChanged = (dx * dx + dy * dy + dz * dz) >= 7.62939453125E-6D;
-+                // Paper end - reduce allocation of Vec3 here
-+
-                 MovementPacket<ClientGamePacketListener> packet;
--                if (this.entity instanceof AbstractArrow) {
--                    packet = this.createMovePacket(position, yRotn, xRotn, true, true);
-+                boolean pos = positionChanged || this.tickCount % 60 == 0;
-+                long xa = this.positionCodec.encodeX(currentPosition);
-+                long ya = this.positionCodec.encodeY(currentPosition);
-+                long za = this.positionCodec.encodeZ(currentPosition);
-+                boolean deltaTooBig = xa < -32768L || xa > 32767L || ya < -32768L || ya > 32767L || za < -32768L || za > 32767L;
+@@ -169,7 +176,7 @@ public class ServerEntity {
+                 long ya = this.positionCodec.encodeY(currentPosition);
+                 long za = this.positionCodec.encodeZ(currentPosition);
+                 boolean deltaTooBig = xa < -32768L || xa > 32767L || ya < -32768L || ya > 32767L || za < -32768L || za > 32767L;
+-                if (this.entity.getRequiresPrecisePosition()
 +                if (this.forceStateResync || this.entity.getRequiresPrecisePosition() // Paper - fix desync when a player is added to the tracker
-+                    || deltaTooBig
-+                    || this.teleportDelay > 400
-+                    || this.wasRiding
-+                    || this.wasOnGround != this.entity.onGround()) {
-+                    this.wasOnGround = this.entity.onGround();
-+                    this.teleportDelay = 0;
-+                    packet = ClientboundEntityPositionSyncPacket.of(this.entity);
-+                } else if ((!pos || !shouldSendRotation) && !(this.entity instanceof AbstractArrow)) {
-+                    if (pos) {
-+                        packet = this.createMovePacket(position, yRotn, xRotn, true, true);
-+                    } else if (shouldSendRotation) {
-+                        packet = this.createMovePacket(position, yRotn, xRotn, false, true);
-+                    } else {
-+                        packet = null;
-+                    }
-                 } else {
--                    // Paper start - reduce allocation of Vec3 here
--                    Vec3 base = this.positionCodec.base;
--                    double dx = currentPosition.x - base.x;
--                    double dy = currentPosition.y - base.y;
--                    double dz = currentPosition.z - base.z;
--                    boolean positionChanged = (dx * dx + dy * dy + dz * dz) >= 7.62939453125E-6D;
--                    // Paper end - reduce allocation of Vec3 here
-                     boolean shouldSendPosition = positionChanged || this.tickCount % 60 == 0;
-                     packet = this.createMovePacket(position, yRotn, xRotn, shouldSendPosition, shouldSendRotation);
-                 }
-@@ -229,6 +256,7 @@ public class ServerEntity {
+                     || deltaTooBig
+                     || this.teleportDelay > 400
+                     || this.wasRiding
+@@ -238,6 +245,7 @@ public class ServerEntity {
              }
  
              this.entity.needsSync = false;

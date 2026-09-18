@@ -5,7 +5,7 @@ Subject: [PATCH] Optional per player mob spawns
 
 
 diff --git a/net/minecraft/server/level/ChunkMap.java b/net/minecraft/server/level/ChunkMap.java
-index 5a8f8eb8f6400ab2397483400ef3853fd0cf6895..17345e9492e4a97bcb71c146bd43bb55b4db871f 100644
+index 206a897e9d74b48d38e2ea1652e9b7ed4735f828..fee899044c389003a1f976f04b752bc78e2bfb69 100644
 --- a/net/minecraft/server/level/ChunkMap.java
 +++ b/net/minecraft/server/level/ChunkMap.java
 @@ -237,11 +237,29 @@ public class ChunkMap extends SimpleRegionStorage implements ChunkHolder.PlayerP
