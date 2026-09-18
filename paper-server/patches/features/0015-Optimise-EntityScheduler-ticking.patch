@@ -20,10 +20,17 @@ index ba372f75dec3ee8b89c48df2cc646f071a47d25a..706f529a7d1064aad128b1ee8c82f631
  
      @Override
 diff --git a/net/minecraft/server/MinecraftServer.java b/net/minecraft/server/MinecraftServer.java
+<<<<<<<< HEAD:paper-server/patches/features/0017-Optimise-EntityScheduler-ticking.patch
 index b4eec1a0cead01ecbb00aac390106ccbdcd5e0a0..5aba7af530d57fc0472dc584f416a3da7560fbef 100644
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
 @@ -1743,32 +1743,22 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+========
+index 8947e4a84c820db31b600ad9db8a884542806ca8..d6500e28e6b50912718e0b75ee495f279acd2ee0 100644
+--- a/net/minecraft/server/MinecraftServer.java
++++ b/net/minecraft/server/MinecraftServer.java
+@@ -1740,32 +1740,22 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+>>>>>>>> upstream/dev/26.3:paper-server/patches/features/0015-Optimise-EntityScheduler-ticking.patch
          return new ServerStatus.Players(maxPlayers, players.size(), sample);
      }
  

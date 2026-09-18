@@ -381,10 +381,18 @@ index 1480d0db90f5797e3dee19503e52d1e783493ac3..bd76e55ea56dd7c1e232806d1d13a747
 +    // Paper end
  }
 diff --git a/net/minecraft/server/network/ServerConnectionListener.java b/net/minecraft/server/network/ServerConnectionListener.java
-index cb1c3b82eab2f45e550f104b0b3911ce8f852c93..7a5acbb68f46ad99d86aae83712a2b61cf5684d4 100644
+index cb1c3b82eab2f45e550f104b0b3911ce8f852c93..c2b09a693daf8b4d3d274c07b3be37ba4fc1a483 100644
 --- a/net/minecraft/server/network/ServerConnectionListener.java
 +++ b/net/minecraft/server/network/ServerConnectionListener.java
-@@ -83,6 +83,7 @@ public class ServerConnectionListener {
+@@ -43,6 +43,7 @@ import org.jspecify.annotations.Nullable;
+ import org.slf4j.Logger;
+ 
+ public class ServerConnectionListener {
++    private static final boolean disableFlushConsolidation = Boolean.getBoolean("Paper.disableFlushConsolidate"); // Paper - Optimize network
+     private static final Logger LOGGER = LogUtils.getLogger();
+     private final MinecraftServer server;
+     public volatile boolean running;
+@@ -83,6 +84,7 @@ public class ServerConnectionListener {
                                      } catch (ChannelException var5) {
                                      }
  
@@ -392,21 +400,11 @@ index cb1c3b82eab2f45e550f104b0b3911ce8f852c93..7a5acbb68f46ad99d86aae83712a2b61
                                      ChannelPipeline pipeline = channel.pipeline().addLast(HandlerNames.TIMEOUT, new ReadTimeoutHandler(30));
                                      if (ServerConnectionListener.this.server.repliesToStatus()) {
                                          pipeline.addLast(HandlerNames.LEGACY_QUERY, new LegacyQueryHandler(ServerConnectionListener.this.getServer()));
-@@ -311,12 +312,17 @@ public class ServerConnectionListener {
-         return this.server;
-     }
- 
-+    // Paper start - prevent blocking on adding a new connection while the server is ticking
-+    private static final boolean disableFlushConsolidation = Boolean.getBoolean("Paper.disableFlushConsolidate"); // Paper - Optimize network
-+
-     private void addPendingConnections() {
+@@ -315,6 +317,7 @@ public class ServerConnectionListener {
          Connection connection;
          while ((connection = this.pendingConnections.poll()) != null) {
              this.connections.add(connection);
 +            connection.isPending = false; // Paper - Optimize network
          }
      }
-+    // Paper end - prevent blocking on adding a new connection while the server is ticking
  
-     public List<Connection> getConnections() {
-         return this.connections;

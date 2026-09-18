@@ -6509,7 +6509,7 @@ index 0000000000000000000000000000000000000000..45c927417d34ddd48c92116efd9b5777
 +}
 diff --git a/ca/spottedleaf/moonrise/patches/chunk_system/queue/ChunkUnloadQueue.java b/ca/spottedleaf/moonrise/patches/chunk_system/queue/ChunkUnloadQueue.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..7dda31a98de2ddf0ca7a520ae48025fc96754011
+index 0000000000000000000000000000000000000000..78659864651362de4fc104cbeb3e2e9a31b101d9
 --- /dev/null
 +++ b/ca/spottedleaf/moonrise/patches/chunk_system/queue/ChunkUnloadQueue.java
 @@ -0,0 +1,144 @@
@@ -6624,7 +6624,7 @@ index 0000000000000000000000000000000000000000..7dda31a98de2ddf0ca7a520ae48025fc
 +            ret.add(sectionJson);
 +
 +            sectionJson.addProperty("sectionX", section.sectionX());
-+            sectionJson.addProperty("sectionZ", section.sectionX());
++            sectionJson.addProperty("sectionZ", section.sectionZ());
 +            sectionJson.addProperty("order", section.order());
 +
 +            final JsonArray coordinates = new JsonArray();
@@ -15208,7 +15208,7 @@ index 0000000000000000000000000000000000000000..ce3bb903c9ccb7efa0f004cf79b291dc
 +}
 diff --git a/ca/spottedleaf/moonrise/patches/chunk_system/util/ParallelSearchRadiusIteration.java b/ca/spottedleaf/moonrise/patches/chunk_system/util/ParallelSearchRadiusIteration.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..28d796a3fddebf0bb25ba759969aadecc5a6a2de
+index 0000000000000000000000000000000000000000..4e7138bce3b479f7013e929c870f69bfd775fcb9
 --- /dev/null
 +++ b/ca/spottedleaf/moonrise/patches/chunk_system/util/ParallelSearchRadiusIteration.java
 @@ -0,0 +1,360 @@
@@ -15276,7 +15276,7 @@ index 0000000000000000000000000000000000000000..28d796a3fddebf0bb25ba759969aadec
 +    }
 +
 +    public static long[] getEuclideanIteration(final int radius) {
-+        return SEARCH_RADIUS_ITERATION_LIST[radius];
++        return EUCLIDEAN_RADIUS_ITERATION_LIST[radius];
 +    }
 +
 +    private static class CustomLongArray extends LongArrayList {
@@ -23443,7 +23443,7 @@ index 0000000000000000000000000000000000000000..95154636727366adfb4fb67e7db8b09f
 +    private SaveUtil() {}
 +}
 diff --git a/io/papermc/paper/FeatureHooks.java b/io/papermc/paper/FeatureHooks.java
-index 639ff94cd3cdd350a0ce7bee48560baedaa3c8c3..5c369a0b14253f119cdf3578e26451d873e703a2 100644
+index fbad2fd2ea324fec44f27ac35024579b5436db25..82377ee76caac220f7565cb729b9e608206a685a 100644
 --- a/io/papermc/paper/FeatureHooks.java
 +++ b/io/papermc/paper/FeatureHooks.java
 @@ -1,6 +1,9 @@
@@ -24485,9 +24485,21 @@ index d40863262dd7cf0e7c5667fd836e80d4f47e25aa..43ceb70d1e0c577f5e48fad0ea1e1d4a
      // CraftBukkit start
      public boolean isDebugging() {
 diff --git a/net/minecraft/server/dedicated/DedicatedServer.java b/net/minecraft/server/dedicated/DedicatedServer.java
-index 4f25b583fe53a989a3f02a897cb94fb104902f67..d4e60de0df69f2929024b513f3c637d5e27cf6fa 100644
+index 4f25b583fe53a989a3f02a897cb94fb104902f67..68675926ee85f738b3693a76fc29b80b80c717ed 100644
 --- a/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/net/minecraft/server/dedicated/DedicatedServer.java
+@@ -408,9 +408,9 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
+     }
+ 
+     @Override
+-    public boolean saveAllChunks(final boolean silent, final boolean flush, final boolean force) {
++    public boolean saveAllChunks(final boolean silent, final boolean flush, final boolean force, final boolean close) { // Paper - rewrite chunk system - add close param
+         this.notificationManager().serverSaveStarted();
+-        boolean savedChunks = super.saveAllChunks(silent, flush, force);
++        boolean savedChunks = super.saveAllChunks(silent, flush, force, close); // Paper - rewrite chunk system - add close param
+         this.notificationManager().serverSaveCompleted();
+         return savedChunks;
+     }
 @@ -530,7 +530,33 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
          this.handleConsoleInputs();
      }
@@ -30445,7 +30457,7 @@ index 892b338a2b0a185511c352ca2bb76ee3890836fd..cc938f43c4a5e947ed87ca2001cbaca4
  
      // Paper start - Affects Spawning API
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index f83bfcaca787e74125763cb893b9c162031463ad..38bf383a27880560ffb5480ddfd21edc5a542cda 100644
+index f83bfcaca787e74125763cb893b9c162031463ad..d327301693c70affc866d355a08efe935e3656b4 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
 @@ -85,6 +85,7 @@ import net.minecraft.world.level.storage.LevelData;
@@ -31171,7 +31183,7 @@ index f83bfcaca787e74125763cb893b9c162031463ad..38bf383a27880560ffb5480ddfd21edc
              return false;
 -        return LevelAccessor.super.noCollision(entity, box);
 +        // Paper start - optimise collisions
-+        final int flags = entity == null ? (ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.COLLISION_FLAG_CHECK_BORDER | ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.COLLISION_FLAG_CHECK_ONLY) : ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.COLLISION_FLAG_CHECK_ONLY;
++        final int flags = entity != null ? (ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.COLLISION_FLAG_CHECK_BORDER | ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.COLLISION_FLAG_CHECK_ONLY) : ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.COLLISION_FLAG_CHECK_ONLY;
 +        if (ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.getCollisionsForBlocksOrWorldBorder((Level)(Object)this, entity, box, null, null, flags, null)) {
 +            return false;
 +        }
@@ -32668,7 +32680,7 @@ index d00bb7c0e2dcfa75a2a62ad99bb843d9fc24e49c..665915290911a2a9390062c109103d9a
  
      @Override
 diff --git a/net/minecraft/world/level/block/state/properties/IntegerProperty.java b/net/minecraft/world/level/block/state/properties/IntegerProperty.java
-index 1338213c0c918301a8fbc232b25d55804bda9cf9..954e61059e07bf4bc36270d64c6aa513ecbabc26 100644
+index 1338213c0c918301a8fbc232b25d55804bda9cf9..8e89405ed73e68b641fd8a47963c60a1ccb1c907 100644
 --- a/net/minecraft/world/level/block/state/properties/IntegerProperty.java
 +++ b/net/minecraft/world/level/block/state/properties/IntegerProperty.java
 @@ -5,11 +5,33 @@ import java.util.List;
@@ -32687,7 +32699,7 @@ index 1338213c0c918301a8fbc232b25d55804bda9cf9..954e61059e07bf4bc36270d64c6aa513
 +        final int val = value.intValue();
 +        final int ret = val - this.min;
 +
-+        return ret | ((this.max - ret) >> 31);
++        return ret | ((this.max - this.min - ret) >> 31);
 +    }
 +
 +    private void init() {

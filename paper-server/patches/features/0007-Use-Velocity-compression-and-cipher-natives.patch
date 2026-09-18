@@ -320,10 +320,10 @@ index 276a4387e30c3d73a8d241f82d6d2597813ffb4e..3b22660c9120a5de922242d717121ef5
              this.channel.pipeline().fireUserEventTriggered(io.papermc.paper.network.ConnectionEvent.COMPRESSION_THRESHOLD_SET); // Paper - Add Channel initialization listeners
          } else {
 diff --git a/net/minecraft/server/network/ServerConnectionListener.java b/net/minecraft/server/network/ServerConnectionListener.java
-index 7a5acbb68f46ad99d86aae83712a2b61cf5684d4..02480bb4d6aa8625aa1c724d40a9d6508a730789 100644
+index c2b09a693daf8b4d3d274c07b3be37ba4fc1a483..2f3b58491ef7be8cd2e081f2c44869cd1e50e6a6 100644
 --- a/net/minecraft/server/network/ServerConnectionListener.java
 +++ b/net/minecraft/server/network/ServerConnectionListener.java
-@@ -70,6 +70,10 @@ public class ServerConnectionListener {
+@@ -71,6 +71,10 @@ public class ServerConnectionListener {
                  LOGGER.warn("Using HAProxy, please ensure the server port is adequately firewalled.");
              }
              // Paper end - Warn people with console access that HAProxy is in use.
